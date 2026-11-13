@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Plan a golf-cart shuttle trip across NUST H-12: find the cart that gets you to class on time.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <title>Campus Shuttle — NUST golf-cart route planner</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#plan-form">Skip to the trip planner</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#top" aria-label="Campus Shuttle home">
+        <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M4 18 L10 12 L20 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="4" cy="18" r="2.6" fill="var(--bg)" stroke="currentColor" stroke-width="2"/>
+          <circle cx="20" cy="12" r="2.6" fill="var(--bg)" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>Campus Shuttle</span>
+      </a>
+
+      <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span class="visually-hidden">Menu</span>
+        <span class="menu-icon" aria-hidden="true"></span>
+      </button>
+
+      <nav id="site-nav" class="site-nav" aria-label="Main">
+        <ul>
+          <li><a href="#plan">Plan</a></li>
+          <li><a href="#departures">Departures</a></li>
+          <li><a href="#routes">Routes</a></li>
+          <li><a href="#about">About</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- 1. Trip planner: the core workflow -->
+    <section id="plan" class="section plan" aria-labelledby="plan-title">
+      <div class="container">
+        <div class="intro">
+          <h1 id="plan-title">Get to class on time.</h1>
+          <p class="lede">NUST H‑12 is too big to walk between classes. Tell the planner where you are, where you need to be and when, and it finds the golf cart to catch, with up to two changes if you need them.</p>
+        </div>
+
+        <div class="plan-grid">
+          <form id="plan-form" class="panel plan-form" aria-describedby="form-hint">
+            <fieldset class="trip-fields">
+              <legend class="visually-hidden">Trip</legend>
+
+              <div class="field">
+                <label for="from">From</label>
+                <select id="from" name="from" required>
+                  <option value="">Choose a stop</option>
+                </select>
+              </div>
+
+              <button class="swap-button" type="button" id="swap" aria-label="Swap start and destination">
+                <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M6 3v13M6 16l-3-3M6 16l3-3M14 17V4M14 4l-3 3M14 4l3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+
+              <div class="field">
+                <label for="to">To</label>
+                <select id="to" name="to" required>
+                  <option value="">Choose a stop</option>
+                </select>
+                <p class="field-error" id="to-error" aria-live="polite"></p>
+              </div>
+            </fieldset>
+
+            <fieldset class="segmented-field">
+              <legend>Day</legend>
+              <div class="segmented" id="day-options">
+                <!-- filled from DAYS in app.js -->
+              </div>
+            </fieldset>
+
+            <fieldset class="when-fields">
+              <legend class="visually-hidden">Time</legend>
+              <div class="field">
+                <label for="mode">I want to</label>
+                <select id="mode" name="mode">
+                  <option value="arrive">Arrive by</option>
+                  <option value="depart">Leave after</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="time">Time</label>
+                <input id="time" name="time" type="time" required min="06:00" max="23:00" step="60">
+                <p class="field-error" id="time-error" aria-live="polite"></p>
+              </div>
+            </fieldset>
+
+            <div class="options-row">
+              <div class="field field-inline" id="early-field">
+                <label for="early">Minutes early</label>
+                <input id="early" name="early" type="number" inputmode="numeric" min="0" max="30" step="1" value="5" required>
+              </div>
+              <label class="toggle" for="transfer">
+                <input id="transfer" name="transfer" type="checkbox" role="switch" checked>
+                <span class="toggle-track" aria-hidden="true"></span>
+                <span>Allow changes</span>
+              </label>
+            </div>
+
+            <p class="form-hint" id="form-hint">Carts run 7:30 am to 5:00 pm, Monday to Friday, with a break for Friday prayer. No carts at the weekend.</p>
+
+            <button class="button button-primary" type="submit">Find carts</button>
+          </form>
+
+          <section class="results" id="results" aria-labelledby="results-title" aria-live="polite">
+            <h2 id="results-title" class="visually-hidden">Results</h2>
+            <div id="results-body"></div>
+          </section>
+
+          <figure class="map-panel panel" id="map-panel">
+            <div class="map-scroll" tabindex="0" aria-label="Shuttle map, scroll sideways to see all of it">
+              <svg id="map" class="map" viewBox="0 0 1000 820" role="img" aria-labelledby="map-title map-desc">
+                <title id="map-title">Campus golf-cart map</title>
+                <desc id="map-desc">Map of NUST H-12 traced from the campus map, showing the golf-cart routes along the real roads and the stops they serve.</desc>
+              </svg>
+            </div>
+            <figcaption class="map-legend" id="map-legend"></figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Live departures from one stop -->
+    <section id="departures" class="section departures" aria-labelledby="departures-title">
+      <div class="container">
+        <header class="section-head">
+          <h2 id="departures-title">Departures</h2>
+          <p>See which carts leave a stop next. The list updates every 30 seconds.</p>
+        </header>
+
+        <div class="board-layout">
+          <form class="board-controls" id="board-form">
+            <div class="field">
+              <label for="board-stop">Stop</label>
+              <select id="board-stop" name="board-stop"></select>
+            </div>
+            <div class="field">
+              <label for="board-time">Time</label>
+              <div class="time-with-button">
+                <input id="board-time" name="board-time" type="time" step="60">
+                <button type="button" class="button button-quiet" id="board-now">Now</button>
+              </div>
+            </div>
+          </form>
+
+          <div class="board" id="board" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Routes and stops -->
+    <section id="routes" class="section routes" aria-labelledby="routes-title">
+      <div class="container">
+        <header class="section-head">
+          <h2 id="routes-title">Routes</h2>
+          <p><span id="route-count">Five routes.</span> Search for a stop to see which carts serve it.</p>
+        </header>
+
+        <div class="route-tools">
+          <div class="field search-field">
+            <label for="stop-search" class="visually-hidden">Search stops</label>
+            <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <input id="stop-search" type="search" placeholder="Search stops, e.g. SEECS or Razi" autocomplete="off">
+          </div>
+          <div class="chip-row" id="route-filter" role="group" aria-label="Filter by route"></div>
+        </div>
+
+        <p class="route-status" id="route-status" aria-live="polite"></p>
+        <ul class="route-list" id="route-list"></ul>
+      </div>
+    </section>
+
+    <!-- 4. About: user, problem, client vs server -->
+    <section id="about" class="section about" aria-labelledby="about-title">
+      <div class="container about-grid">
+        <h2 id="about-title">About this planner</h2>
+        <div class="about-text">
+          <p>Built for students who live in a campus hostel and have a class, lab or exam in another school. Golf carts circle the campus, but at 8 am, at lunch and at 5 pm everyone needs one at once. The question is always the same: which cart do I need to catch, and will it get me there in time?</p>
+          <p>Everything you see runs in your browser. The stops, routes, carts and timetables are sample records stored in the page’s JavaScript, and nothing you type leaves your device. Timetables are worked out from each route’s lap time and the number of carts on it, with extra carts at peak times. A later version will load these records from a server so they can be updated without changing the page.</p>
+          <p class="fine-print">Sample data created for CS344 Web Engineering, Assignment 1. Stop positions follow the NUST campus map; routes, cart numbers and times are invented. Not an official NUST service.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>Campus Shuttle</p>
+      <p>Project idea 02, CS344 Web Engineering, Fall 2026</p>
+    </div>
+  </footer>
+
+  <template id="journey-template">
+    <li class="journey">
+      <button class="journey-select" type="button" aria-pressed="false">
+        <span class="journey-head">
+          <span class="journey-board"></span>
+          <span class="journey-summary"></span>
+        </span>
+        <span class="journey-tags"></span>
+      </button>
+      <ol class="legs"></ol>
+    </li>
+  </template>
+
+  <script src="js/data.js"></script>
+  <script src="js/planner.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
