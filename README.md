@@ -73,7 +73,7 @@ Then open <http://localhost:8000>. (VS Code's Live Server extension also works.)
 
 ## Wireframe and design note
 
-- Wireframe: [`docs/wireframe.svg`](docs/wireframe.svg)
+- Wireframe: [`docs/wireframe.svg`](docs/wireframe.png)
 - Design note (user and problem, WDLC stages, browser vs server): [`docs/design-note.md`](docs/design-note.md)
 
 ## Project structure
